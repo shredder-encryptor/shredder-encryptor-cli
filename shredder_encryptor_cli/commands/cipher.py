@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Callable, Dict
+from typing import Callable
 
 from .._argparse import add_common_arguments, style
 from .. import color_code as _cc
@@ -46,7 +46,7 @@ def _build_sha(key: bytes):
 
 #: Maps cipher name to ``(builder, reversible)``.  ``builder(key)``
 #: returns a :class:`framework.BaseCipher` instance.
-CIPHERS: Dict[str, tuple[Callable[[bytes], object], bool]] = {
+CIPHERS: dict[str, tuple[Callable[[bytes], object], bool]] = {
     "vigenere": (_build_vigenere, True),
     "xor-stream": (_build_xor, True),
     "feistel-ecb": (_build_ecb, True),

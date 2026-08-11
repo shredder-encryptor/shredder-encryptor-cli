@@ -6,7 +6,7 @@ import argparse
 import importlib
 import sys
 from pathlib import Path
-from typing import Callable, Dict
+from typing import Callable
 
 from .._argparse import add_common_arguments, style
 from .. import color_code as _cc
@@ -47,7 +47,7 @@ def _submodule(name: str) -> object:
 
 #: Mapping from encoding name to its codec pair.  Each pair exposes
 #: ``encode(bytes) -> bytes`` and ``decode(bytes) -> bytes``.
-ENCODINGS: Dict[str, Dict[str, Callable[[bytes], bytes]]] = {
+ENCODINGS: dict[str, dict[str, Callable[[bytes], bytes]]] = {
     "base64": {
         "encode": lambda data: _submodule("b64").encode(data).encode("ascii"),
         "decode": lambda data: _submodule("b64").decode(data),
