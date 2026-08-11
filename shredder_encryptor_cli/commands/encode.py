@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import sys
 from pathlib import Path
 from typing import Callable, Dict
@@ -14,74 +15,66 @@ from ..ui import bullet, info, success
 __all__ = ["add_parser", "ENCODINGS"]
 
 
+#: Name of the codec package that supplies every encoder / decoder.
+_CODEC_PACKAGE = "shredder_encryptor.codec"
+
+
+def _submodule(name: str) -> object:
+    """Return a codec submodule from :data:`_CODEC_PACKAGE`.
+
+    This deliberately uses :func:`importlib.import_module` (which always
+    returns the parent package, never a re-exported attribute) and then
+    reaches for the requested submodule via :func:`getattr`.  The previous
+    implementation used ``__import__(..., fromlist=[name])``, which has a
+    well-known footgun: when ``fromlist`` names a submodule, ``__import__``
+    returns *that* submodule rather than the parent package.  Combined with
+    re-exports in :mod:`shredder_encryptor.codec.__init__` (e.g. ``uuencode``
+    is both a submodule and a function), the call could resolve to a
+    callable and the subsequent attribute access would explode with
+    ``AttributeError`` at run time.
+    """
+
+    package = importlib.import_module(_CODEC_PACKAGE)
+    module = getattr(package, name)
+    if not hasattr(module, name):
+        # ``getattr`` may pick up a re-exported symbol (function, class, ...)
+        # that happens to share the submodule's name.  In that case fall
+        # back to importing the submodule explicitly so attribute access
+        # below always sees a real module object.
+        module = importlib.import_module(f"{_CODEC_PACKAGE}.{name}")
+    return module
+
+
 #: Mapping from encoding name to its codec pair.  Each pair exposes
 #: ``encode(bytes) -> bytes`` and ``decode(bytes) -> bytes``.
 ENCODINGS: Dict[str, Dict[str, Callable[[bytes], bytes]]] = {
     "base64": {
-        "encode": lambda data: (
-            __import__("shredder_encryptor.codec", fromlist=["b64"])
-            .b64.encode(data)
-            .encode("ascii")
-        ),
-        "decode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["b64"]
-        ).b64.decode(data),
+        "encode": lambda data: _submodule("b64").encode(data).encode("ascii"),
+        "decode": lambda data: _submodule("b64").decode(data),
     },
     "base64url": {
-        "encode": lambda data: (
-            __import__("shredder_encryptor.codec", fromlist=["b64"])
-            .b64.encode_url(data)
-            .encode("ascii")
-        ),
-        "decode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["b64"]
-        ).b64.decode_url(data),
+        "encode": lambda data: _submodule("b64").encode_url(data).encode("ascii"),
+        "decode": lambda data: _submodule("b64").decode_url(data),
     },
     "hex": {
-        "encode": lambda data: (
-            __import__("shredder_encryptor.codec", fromlist=["hexutil"])
-            .hexutil.to_hex(data)
-            .encode("ascii")
-        ),
-        "decode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["hexutil"]
-        ).hexutil.from_hex(data.decode("ascii")),
+        "encode": lambda data: _submodule("hexutil").to_hex(data).encode("ascii"),
+        "decode": lambda data: _submodule("hexutil").from_hex(data.decode("ascii")),
     },
     "qp": {
-        "encode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["quoted_printable"]
-        ).quoted_printable.encode_qp(data),
-        "decode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["quoted_printable"]
-        ).quoted_printable.decode_qp(data),
+        "encode": lambda data: _submodule("quoted_printable").encode_qp(data),
+        "decode": lambda data: _submodule("quoted_printable").decode_qp(data),
     },
     "uuencode": {
-        "encode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["uuencode"]
-        ).uuencode.uuencode(data),
-        "decode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["uuencode"]
-        ).uuencode.uudecode(data),
+        "encode": lambda data: _submodule("uuencode").uuencode(data),
+        "decode": lambda data: _submodule("uuencode").uudecode(data),
     },
     "ascii85": {
-        "encode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["ascii85"]
-        ).ascii85.encode_ascii85(data),
-        "decode": lambda data: __import__(
-            "shredder_encryptor.codec", fromlist=["ascii85"]
-        ).ascii85.decode_ascii85(data),
+        "encode": lambda data: _submodule("ascii85").encode_ascii85(data),
+        "decode": lambda data: _submodule("ascii85").decode_ascii85(data),
     },
     "url-quote": {
-        "encode": lambda data: (
-            __import__("shredder_encryptor.codec", fromlist=["url"])
-            .url.quote(data)
-            .encode("ascii")
-        ),
-        "decode": lambda data: (
-            __import__("shredder_encryptor.codec", fromlist=["url"])
-            .url.unquote(data)
-            .encode("ascii")
-        ),
+        "encode": lambda data: _submodule("url").quote(data).encode("ascii"),
+        "decode": lambda data: _submodule("url").unquote(data).encode("ascii"),
     },
 }
 
