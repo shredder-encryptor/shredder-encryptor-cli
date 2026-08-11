@@ -82,6 +82,15 @@ def _hex_encode(data: bytes) -> str:
 
 
 def _run(args: argparse.Namespace, *, op: str) -> int:
+    try:
+        return _run_unsafe(args, op=op)
+    except KeyboardInterrupt:
+        # POSIX convention: 128 + SIGINT(2) = 130.
+        warn("interrupted by user (Ctrl+C)")
+        return 130
+
+
+def _run_unsafe(args: argparse.Namespace, *, op: str) -> int:
     builder, reversible = CIPHERS[args.cipher]
     if op == "decrypt" and not reversible:
         warn(f"{args.cipher} is a one-way cipher and cannot be decrypted")

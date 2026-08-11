@@ -10,7 +10,7 @@ from typing import Callable
 
 from .._argparse import add_common_arguments, style
 from .. import color_code as _cc
-from ..ui import bullet, info, success
+from ..ui import bullet, info, success, warn
 
 __all__ = ["add_parser", "ENCODINGS"]
 
@@ -109,6 +109,15 @@ def _add_codec(parser: argparse.ArgumentParser, *, default_format: str) -> None:
 
 
 def _run(args: argparse.Namespace, *, op: str) -> int:
+    try:
+        return _run_unsafe(args, op=op)
+    except KeyboardInterrupt:
+        # POSIX convention: 128 + SIGINT(2) = 130.
+        warn("interrupted by user (Ctrl+C)")
+        return 130
+
+
+def _run_unsafe(args: argparse.Namespace, *, op: str) -> int:
     pair = ENCODINGS[args.format]
     if op not in pair:
         raise SystemExit(f"unknown operation: {op!r}")
