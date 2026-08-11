@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 from ._argparse import ColorfulArgumentParser
 from .commands import register_all
