@@ -2,3 +2,4 @@
 __pycache__/
 .ruff_cache/
 dist/
+shredder_encryptor_cli.egg-info/
