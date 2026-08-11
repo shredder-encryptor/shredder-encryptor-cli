@@ -1,23 +1,33 @@
-"""Main Script Run"""
+"""Allow ``python -m shredder_encryptor_cli``."""
 
-from collections.abc import Callable
+from __future__ import annotations
+
 import sys
+from collections.abc import Callable
+
+__all__ = ["main", "_get_exit_code"]
 
 
-def main() -> None: ...  # TODO: Make this funcion in somewhere
+def main() -> int:
+    from .main import main as _main
 
-def _get_exit_code(func: Callable) -> int:
+    return _main()
+
+
+def _get_exit_code(func: Callable[..., int]) -> int:
     try:
-        func()
+        return int(func())
     except KeyboardInterrupt:
-        print("\nProgram interrupted by user (Ctrl+C)", file=sys.stderr)
-        return 2
-    except Exception as exc:
-        print(f"\nRuntime error: {exc}", file=sys.stderr)
+        from .ui import warn
+
+        warn("interrupted by user (Ctrl+C)")
+        return 130
+    except Exception as exc:  # pragma: no cover - defensive
+        from .ui import error
+
+        error(f"unexpected error: {exc}")
         return 1
-    else:
-        return 0
-    
+
+
 if __name__ == "__main__":
-    res = _get_exit_code(main)
-    sys.exit(res)
+    sys.exit(_get_exit_code(main))

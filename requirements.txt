@@ -1,0 +1,1 @@
+shredder-encryptor>=2026.8.0
