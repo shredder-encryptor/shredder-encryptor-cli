@@ -7,13 +7,8 @@ external dependency is the `shredder-encryptor` package itself.
 
 ## Install
 
-The project is not published on PyPI yet; install it from the sibling
-checkout:
-
 ```bash
-git clone https://github.com/shredder-encryptor/shredder-encryptor-cli
-cd shredder-encryptor-cli
-python -m pip install -e .
+pip install shredder-encryptor-cli
 ```
 
 ## Usage
@@ -32,9 +27,8 @@ shredder-cli
 
 ```bash
 $ echo -n "hello" | shredder-cli encode --format base64
-i info encode 5 bytes with base64
-+ success done
-aGVsbG8=
+aGVsbG8NCg==i encode 7 bytes with base64
+✓ done
 ```
 
 ### Encrypt
@@ -43,15 +37,6 @@ aGVsbG8=
 $ shredder-cli encrypt --cipher feistel-cbc \
     --key "my-key" --encoding hex \
     --input msg.txt --output msg.enc
-```
-
-### Key store
-
-```bash
-$ shredder-cli key save demo --data - < token.bin
-$ shredder-cli key list
-  - demo
-$ shredder-cli key load demo > token.bin
 ```
 
 ## Colours
@@ -64,6 +49,10 @@ The CLI follows the [`NO_COLOR`](https://no-color.org/) convention:
 | `NO_COLOR=1`    | plain text                |
 | `SHREEDER_COLOR=never` | plain text         |
 | `SHREEDER_COLOR=always` | colours even when piped |
+
+## I can't use!
+
+See more? [Install it!](#install)
 
 ## License
 
