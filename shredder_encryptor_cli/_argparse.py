@@ -20,7 +20,7 @@ import os
 import sys
 from typing import Any
 
-from .. import color_code as _cc
+from . import color_code as _cc
 
 __all__ = ["ColorfulArgumentParser", "style", "add_common_arguments"]
 
