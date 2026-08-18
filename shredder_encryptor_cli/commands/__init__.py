@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Callable
 
 #: Type alias for ``add_parser(parser)`` style registrations.
-CommandFactory = Callable[["object"], None]
+CommandFactory = Callable[[object], None]
 
 __all__ = ["CommandFactory", "register_all"]
 
