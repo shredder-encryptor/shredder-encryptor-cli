@@ -10,11 +10,13 @@ from __future__ import annotations
 from typing import Callable
 
 #: Type alias for ``add_parser(parser)`` style registrations.
+# TODO: remove this thing?
 CommandFactory = Callable[[object], None]
 
 __all__ = ["CommandFactory", "register_all"]
 
 
+# Used
 def register_all(parsers: object) -> None:
     """Attach every command in this package to ``parsers``."""
 
